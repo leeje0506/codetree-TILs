@@ -6,11 +6,11 @@ import java.util.Queue;
 import java.util.StringTokenizer;
 
 public class Main {
-    static int[][] grid;
-    static boolean[][] visited;
-    static int n, L, R;
-    static int[] dx = {-1, 1, 0, 0};
-    static int[] dy = {0, 0, -1, 1};
+    static int[][] grid; // 격자판의 계란의 양을 저장할 배열
+    static boolean[][] visited; // 방문 여부를 체크할 배열
+    static int n, L, R; // 격자판의 크기 n, 조건 L, R
+    static int[] dx = {-1, 1, 0, 0}; // x축 이동 (상, 하)
+    static int[] dy = {0, 0, -1, 1}; // y축 이동 (좌, 우)
 
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
@@ -28,34 +28,34 @@ public class Main {
             }
         }
 
-        System.out.println(getTotalMovements());
+        System.out.println(getTotalMovements()); // 결과 출력
     }
 
     static int getTotalMovements() {
-        int totalMovements = 0;
+        int totalMovements = 0; // 계란 이동 횟수
 
         while (true) {
             visited = new boolean[n][n];
-            boolean isMoved = false;
+            boolean isMoved = false; // 이동이 발생했는지 여부
 
             for (int i = 0; i < n; i++) {
                 for (int j = 0; j < n; j++) {
                     if (!visited[i][j]) {
-                        int sum = bfs(i, j);
-                        if (sum > 1) { // If more than one cell is combined
+                        int sum = bfs(i, j); // BFS 실행
+                        if (sum > 1) { // 두 개 이상의 계란틀이 합쳐졌다면
                             isMoved = true;
                         }
                     }
                 }
             }
 
-            if (!isMoved) {
+            if (!isMoved) { // 더 이상 이동할 계란틀이 없다면 반복 종료
                 break;
             }
-            totalMovements++;
+            totalMovements++; // 이동 횟수 증가
         }
 
-        return totalMovements;
+        return totalMovements; // 총 이동 횟수 반환
     }
 
     static int bfs(int x, int y) {
@@ -66,7 +66,7 @@ public class Main {
         toUpdate.add(new int[]{x, y});
 
         int sum = grid[x][y];
-        int cells = 1;
+        int cells = 1; // 합쳐진 계란틀의 수
 
         while (!queue.isEmpty()) {
             int[] cur = queue.poll();
@@ -77,27 +77,28 @@ public class Main {
 
                 if (nx >= 0 && ny >= 0 && nx < n && ny < n && !visited[nx][ny]) {
                     int diff = Math.abs(grid[cur[0]][cur[1]] - grid[nx][ny]);
+                    // 조건에 맞는 인접 계란틀 탐색
                     if (diff >= L && diff <= R) {
                         visited[nx][ny] = true;
                         queue.add(new int[]{nx, ny});
                         toUpdate.add(new int[]{nx, ny});
-                        sum += grid[nx][ny];
-                        cells++;
+                        sum += grid[nx][ny]; // 계란의 총합
+                        cells++; // 합쳐진 계란틀의 개수
                     }
                 }
             }
         }
 
-        // Redistribute the eggs if more than one cell is combined
+        // 합쳐진 계란틀이 있다면 평균값으로 업데이트
         if (cells > 1) {
             int avg = sum / cells;
             while (!toUpdate.isEmpty()) {
                 int[] cur = toUpdate.poll();
-                grid[cur[0]][cur[1]] = avg;
+                grid[cur[0]][cur[1]] = avg; // 평균값으로 계란의 양 업데이트
             }
-            return cells; // Return the number of combined cells
+            return cells; // 합쳐진 계란틀의 수 반환
         }
 
-        return 1; // Return 1 if no cells are combined
+        return 1; // 합쳐진 계란틀이 없다면 1 반환
     }
 }
