@@ -41,7 +41,7 @@ public class Main {
             for (int i = 0; i < n; i++) {
                 for (int j = 0; j < n; j++) {
                     if (!visited[i][j]) {
-                        int sum = dfs(i, j, 0, 0);
+                        int sum = bfs(i, j);
                         if (sum > 1) { // If more than one cell is combined
                             isMoved = true;
                         }
@@ -58,15 +58,19 @@ public class Main {
         return totalMovements;
     }
 
-    static int dfs(int x, int y, int sum, int cells) {
+    static int bfs(int x, int y) {
         visited[x][y] = true;
-        sum += grid[x][y];
-        cells++;
         Queue<int[]> queue = new LinkedList<>();
+        Queue<int[]> toUpdate = new LinkedList<>();
         queue.add(new int[]{x, y});
+        toUpdate.add(new int[]{x, y});
+
+        int sum = grid[x][y];
+        int cells = 1;
 
         while (!queue.isEmpty()) {
             int[] cur = queue.poll();
+
             for (int i = 0; i < 4; i++) {
                 int nx = cur[0] + dx[i];
                 int ny = cur[1] + dy[i];
@@ -75,23 +79,25 @@ public class Main {
                     int diff = Math.abs(grid[cur[0]][cur[1]] - grid[nx][ny]);
                     if (diff >= L && diff <= R) {
                         visited[nx][ny] = true;
-                        sum = dfs(nx, ny, sum, cells);
+                        queue.add(new int[]{nx, ny});
+                        toUpdate.add(new int[]{nx, ny});
+                        sum += grid[nx][ny];
                         cells++;
                     }
                 }
             }
         }
 
-        // Redistribute the eggs
-        int avg = sum / cells;
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < n; j++) {
-                if (visited[i][j]) {
-                    grid[i][j] = avg;
-                }
+        // Redistribute the eggs if more than one cell is combined
+        if (cells > 1) {
+            int avg = sum / cells;
+            while (!toUpdate.isEmpty()) {
+                int[] cur = toUpdate.poll();
+                grid[cur[0]][cur[1]] = avg;
             }
+            return cells; // Return the number of combined cells
         }
 
-        return cells;
+        return 1; // Return 1 if no cells are combined
     }
 }
